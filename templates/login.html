@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'id') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lang.app_name }} - {{ lang.login }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --sky-blue: #4A90E2;
+            --deep-blue: #2F80ED;
+            --storm-blue: #1C3F95;
+            --sunny-yellow: #FFD166;
+            --cloudy-gray: #A9B4C2;
+            --sunset-orange: #FF9E6D;
+            --text-dark: #2D3748;
+            --text-light: #F7FAFC;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --card-border: rgba(255, 255, 255, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url(/static/images/bg.png);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-light);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .weather-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .sun {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            background: var(--sunny-yellow);
+            border-radius: 50%;
+            box-shadow: 0 0 40px 10px var(--sunny-yellow);
+            animation: pulse 4s infinite alternate;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.7;
+        }
+
+        .cloud-1 {
+            width: 120px;
+            height: 40px;
+            top: 20%;
+            left: 5%;
+            animation: float 20s infinite linear;
+        }
+
+        .cloud-2 {
+            width: 160px;
+            height: 50px;
+            top: 30%;
+            right: 5%;
+            animation: float 25s infinite linear reverse;
+        }
+
+        .cloud-3 {
+            width: 100px;
+            height: 30px;
+            bottom: 25%;
+            left: 15%;
+            animation: float 18s infinite linear;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cloud::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 20px;
+        }
+
+        .cloud::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            right: 20px;
+        }
+
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 2px;
+            animation: rain 1.5s infinite linear;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            padding: 40px 35px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            animation: fadeInScale 1s ease-in-out;
+            z-index: 10;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            margin-right: 10px;
+            color: var(--sunny-yellow);
+        }
+
+        .login-card h1 {
+            font-weight: 700;
+            font-size: 28px;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-card p {
+            font-size: 14px;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--deep-blue);
+            transition: color 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+        }
+
+        .input-group input:focus + i {
+            color: var(--storm-blue);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--storm-blue), var(--deep-blue));
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, var(--deep-blue), var(--storm-blue));
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 3px solid #ff6b6b;
+            text-align: left;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-top: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--sunny-yellow);
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .lang-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .lang-btn.active {
+            background: var(--deep-blue);
+            border-color: var(--deep-blue);
+            font-weight: 600;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 40px 10px var(--sunny-yellow); }
+            100% { transform: scale(1.05); box-shadow: 0 0 50px 15px var(--sunny-yellow); }
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+
+        @keyframes rain {
+            0% { transform: translateY(-50px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 30px 25px; }
+            .login-card h1 { font-size: 24px; }
+            .cloud { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="lang-switcher">
+        <a href="{{ url_for('set_language', lang_code='id') }}" class="lang-btn {{ 'active' if session.get('lang', 'id') == 'id' else '' }}">🇮🇩 ID</a>
+        <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {{ 'active' if session.get('lang') == 'en' else '' }}">🇬🇧 EN</a>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+        <div class="logo">
+            <i class="fas fa-cloud-sun logo-icon"></i>
+            <h1>{{ lang.app_name }}</h1>
+        </div>
+        <p>{{ lang.welcome }}, {{ lang.login_btn }}</p>
+        
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
+        
+        <form method="post">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="{{ lang.username }}" required>
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="{{ lang.password }}" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            <button type="submit" class="btn-login">{{ lang.login_btn }}</button>
+            <a href="#" class="forgot-password">{{ lang.lupa_password }}</a>
+        </form>
+    </div>
+</body>
+</html>

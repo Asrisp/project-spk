@@ -1,0 +1,11 @@
+https://weather-prediction-production-4ede.up.railway.app/
+
+user user123
+admin admin123
+
+sunny : 02042026 
+fog : 13-01-2026 
+snow : 17-01-2026 
+rain : 11-12-2025 
+drizzle : tidak ditemukan (kelas minoritas)
+

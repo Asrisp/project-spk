@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.9",
+        "includeFiles": [
+          "rf_weather_model.pkl",
+          "scaler.pkl",
+          "label_encoder.pkl",
+          "seattle-weather.csv",
+          "templates/**",   
+          "static/**"      
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ]
+}
+

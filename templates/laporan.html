@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'id') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lang.laporan_30_hari }} – {{ lang.app_name }}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg:       #0d1117;
+            --surface:  #161b22;
+            --surface2: #1c2333;
+            --border:   rgba(255,255,255,0.07);
+            --text:     #e6edf3;
+            --muted:    #7d8590;
+            --accent:   #3fb950;
+            --accent2:  #58a6ff;
+            --warn:     #d29922;
+            --danger:   #f85149;
+            --rain:     #1f6feb;
+            --radius:   14px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        nav {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(13,17,23,0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem; height: 56px;
+        }
+        .nav-brand { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--text); display: flex; align-items: center; gap: 10px; }
+        .nav-brand i { color: var(--accent2); font-size: 1rem; }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-user { font-size: 13px; color: var(--muted); }
+        .btn-logout {
+            font-size: 13px; font-family: 'DM Sans', sans-serif;
+            background: transparent; color: var(--danger);
+            border: 1px solid rgba(248,81,73,0.3);
+            border-radius: 8px; padding: 6px 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            transition: background 0.2s; text-decoration: none;
+        }
+        .btn-logout:hover { background: rgba(248,81,73,0.1); }
+        .lang-switch { display: flex; gap: 4px; margin-right: 8px; }
+        .lang-btn { font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); text-decoration: none; }
+        .lang-btn.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+        .lang-btn.inactive { background: transparent; color: var(--muted); }
+
+        .page { display: grid; grid-template-columns: 180px 1fr; min-height: calc(100vh - 56px); }
+        .sidenav {
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0; display: flex; flex-direction: column; gap: 2px;
+            background: rgba(22,34,26,0.5);
+        }
+        .nav-section-label {
+            font-size: 10px; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 0 1rem; margin: 1rem 0 4px;
+        }
+        .sidenav .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 1rem; font-size: 13px; color: var(--muted);
+            border-radius: 8px; margin: 0 8px;
+            cursor: pointer; text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .sidenav .nav-item:hover { background: var(--surface2); color: var(--text); }
+        .sidenav .nav-item.active {
+            background: rgba(63,185,80,0.1); color: var(--accent);
+            border: 1px solid rgba(63,185,80,0.2);
+        }
+        .sidenav .nav-item i { width: 14px; text-align: center; font-size: 12px; }
+        .page-content { padding: 1.75rem 2rem 4rem; overflow: auto; }
+
+        .hero { padding: 0; max-width: 900px; }
+        .hero-eyebrow {
+            font-size: 12px; font-weight: 500; letter-spacing: 0.12em;
+            color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem;
+        }
+        .hero-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            line-height: 1.15; color: var(--text); margin-bottom: 0.5rem;
+        }
+        .hero-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
+        .date-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.25rem 1.5rem;
+            display: flex; align-items: center; gap: 12px;
+            flex-wrap: wrap; margin-bottom: 2.5rem;
+        }
+        .date-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+        .date-card input[type=date] {
+            background: var(--surface2); color: var(--text);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+            cursor: pointer; outline: none;
+        }
+        .btn-primary {
+            background: var(--accent); color: #0d1117;
+            border: none; border-radius: 8px;
+            padding: 9px 20px; font-size: 14px; font-weight: 500;
+            font-family: 'DM Sans', sans-serif; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: opacity 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .main { max-width: 900px; }
+        #loading { display: none; text-align: center; padding: 4rem 0; color: var(--muted); }
+        .spinner {
+            width: 36px; height: 36px; margin: 0 auto 1rem;
+            border: 2px solid var(--border); border-top-color: var(--accent);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .period-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 12px; color: var(--accent2);
+            background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2);
+            border-radius: 20px; padding: 4px 12px; margin-bottom: 1.5rem;
+        }
+        .metric-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px; margin-bottom: 1.5rem;
+        }
+        .metric-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.1rem 1.25rem;
+        }
+        .metric-card .m-label {
+            font-size: 11px; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+        }
+        .metric-card .m-val {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem; color: var(--text); line-height: 1;
+        }
+        .metric-card .m-unit { font-size: 12px; color: var(--muted); margin-top: 3px; }
+        .metric-card.highlight { border-color: rgba(63,185,80,0.3); background: rgba(63,185,80,0.05); }
+        .metric-card.highlight .m-val { color: var(--accent); }
+
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+        @media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
+        .chart-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.25rem;
+        }
+        .chart-title {
+            font-size: 12px; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem;
+        }
+        .chart-wrap { position: relative; height: 160px; }
+        .section-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem; color: var(--text);
+            margin: 2rem 0 1rem; display: flex; align-items: center; gap: 10px;
+        }
+        .section-heading i { font-size: 1rem; color: var(--accent); }
+
+        .kategori-block { margin-bottom: 1.5rem; }
+        .kategori-label {
+            font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+            text-transform: uppercase; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .kategori-label.primadona { color: var(--accent); }
+        .kategori-label.alternatif { color: var(--warn); }
+        .kategori-label.tidak { color: var(--danger); }
+        .kategori-label .kl-line { flex: 1; height: 1px; }
+        .kl-line.primadona { background: rgba(63,185,80,0.2); }
+        .kl-line.alternatif { background: rgba(210,153,34,0.2); }
+        .kl-line.tidak      { background: rgba(248,81,73,0.2); }
+
+        .tanaman-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 500px) { .tanaman-grid { grid-template-columns: 1fr; } }
+        .tanaman-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem 1.1rem;
+            display: flex; align-items: flex-start; gap: 12px;
+        }
+        .tanaman-card.primadona { border-color: rgba(63,185,80,0.35); background: rgba(63,185,80,0.04); }
+        .tanaman-card.alternatif { border-color: rgba(210,153,34,0.25); background: rgba(210,153,34,0.03); }
+        .tanaman-card.tidak_disarankan { border-color: rgba(248,81,73,0.2); background: rgba(248,81,73,0.02); opacity: 0.75; }
+        .rank-circle {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 500; flex-shrink: 0;
+        }
+        .rank-1 { background: rgba(210,153,34,0.2); color: #d29922; border: 1px solid rgba(210,153,34,0.4); }
+        .rank-2 { background: rgba(125,133,144,0.2); color: #c0c8d0; border: 1px solid rgba(125,133,144,0.4); }
+        .rank-3 { background: rgba(209,154,102,0.15); color: #b08060; border: 1px solid rgba(209,154,102,0.3); }
+        .rank-n { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+        .tanaman-info { flex: 1; min-width: 0; }
+        .tanaman-name { font-weight: 500; font-size: 14px; color: var(--text); }
+        .tanaman-skor { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .skor-bar-wrap { height: 3px; background: var(--surface2); border-radius: 2px; margin: 6px 0; }
+        .skor-bar-fill { height: 100%; border-radius: 2px; }
+        .bar-primadona   { background: var(--accent); }
+        .bar-alternatif  { background: var(--warn); }
+        .bar-tidak       { background: var(--danger); }
+        .panen-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; padding: 2px 8px; border-radius: 20px;
+            background: rgba(63,185,80,0.12); color: var(--accent);
+            border: 1px solid rgba(63,185,80,0.3); margin-top: 4px;
+        }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 540px) { .two-col { grid-template-columns: 1fr; } }
+        .info-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.1rem 1.25rem;
+        }
+        .info-card .ic-title {
+            font-size: 11px; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+        }
+        .info-item { font-size: 13px; color: var(--text); padding: 6px 0; border-bottom: 1px solid var(--border); }
+        .info-item:last-child { border-bottom: none; }
+        .warn-card { border-color: rgba(210,153,34,0.25); background: rgba(210,153,34,0.04); }
+
+        .table-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem;
+        }
+        .table-card .table-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+        }
+        .table-card .table-header span {
+            font-size: 11px; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .table-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; }
+        table.daily-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.daily-table thead th {
+            position: sticky; top: 0; background: var(--surface2); color: var(--muted);
+            font-size: 11px; font-weight: 500; text-transform: uppercase;
+            letter-spacing: 0.06em; padding: 9px 14px; text-align: left;
+            border-bottom: 1px solid var(--border); white-space: nowrap;
+        }
+        table.daily-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+        table.daily-table tbody tr:last-child { border-bottom: none; }
+        table.daily-table tbody tr:hover { background: var(--surface2); }
+        table.daily-table tbody td { padding: 8px 14px; color: var(--text); white-space: nowrap; }
+        table.daily-table tbody td.td-date { color: var(--muted); font-size: 12px; }
+
+        .cuaca-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500;
+        }
+        .cuaca-sun     { background: rgba(210,153,34,0.15); color: #d29922; }
+        .cuaca-rain    { background: rgba(31,111,235,0.15);  color: #58a6ff; }
+        .cuaca-drizzle { background: rgba(88,166,255,0.1);   color: #79c0ff; }
+        .cuaca-fog     { background: rgba(125,133,144,0.15); color: #7d8590; }
+        .cuaca-snow    { background: rgba(163,220,255,0.15); color: #a5d6ff; }
+
+        #report { display: none; }
+        .empty-hint { text-align: center; padding: 3rem 0; color: var(--muted); font-size: 14px; }
+        .empty-hint i { font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.3; }
+        .ticker { overflow: hidden; white-space: nowrap; background: var(--bg); border-bottom: 1px solid var(--bg); padding: 8px 0; }
+        .ticker-inner { display: inline-block; padding-left: 100%; animation: ticker 20s linear infinite; font-size: 12px; color: var(--text); }
+        .ticker-inner .label { margin-right: 6px; }
+        .ticker-inner .value { margin-right: 18px; }
+        @keyframes ticker { to { transform: translateX(-100%); } }
+    </style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker">
+    <div class="ticker-inner" id="tickerText">
+        • {{ lang.app_name }} • {{ lang.welcome }}...
+    </div>
+</div>
+
+<nav>
+    <div class="nav-brand">
+        <i class="fas fa-cloud-sun-rain"></i>
+        {{ lang.app_name }}
+    </div>
+    <div class="nav-right">
+        <div class="lang-switch">
+            <a href="{{ url_for('set_language', lang_code='id') }}" class="lang-btn {% if session.get('lang','id')=='id' %}active{% else %}inactive{% endif %}">ID</a>
+            <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if session.get('lang','id')=='en' %}active{% else %}inactive{% endif %}">EN</a>
+        </div>
+        <span class="nav-user">{{ username }}</span>
+        <a href="{{ url_for('logout') }}" class="btn-logout">
+            <i class="fas fa-sign-out-alt"></i> {{ lang.logout }}
+        </a>
+    </div>
+</nav>
+
+<div class="page">
+    <div class="sidenav">
+        <div class="nav-section-label">Menu</div>
+        <a class="nav-item" href="{{ url_for('user_dashboard') }}">
+            <i class="fas fa-home"></i> {{ lang.dashboard }}
+        </a>
+        <a class="nav-item active" href="{{ url_for('laporan_page') }}">
+            <i class="fas fa-chart-line"></i> {{ lang.laporan_30_hari }}
+        </a>
+        {% if session.username == 'admin' %}
+        <a class="nav-item" href="{{ url_for('pengaturan_page') }}">
+            <i class="fas fa-cog"></i> {{ lang.pengaturan }}
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="page-content">
+        <div style="margin-bottom:1.5rem">
+            <div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px">{{ lang.app_name }}</div>
+            <h1 style="font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--text);line-height:1.2;margin-bottom:4px">{{ lang.laporan_30_hari }}</h1>
+            <p style="font-size:13px;color:var(--muted)">{{ lang.pilih_tanggal }}</p>
+        </div>
+
+        <div class="date-card">
+            <span class="date-label"><i class="fas fa-calendar-alt" style="margin-right:6px;color:var(--accent2)"></i>{{ lang.pilih_tanggal }}</span>
+            <input type="date" id="startDate">
+            <button class="btn-primary" id="btnLaporan" onclick="loadLaporan()">
+                <i class="fas fa-chart-line"></i> {{ lang.lihat_laporan }}
+            </button>
+        </div>
+
+        <div class="main">
+            <div id="loading">
+                <div class="spinner"></div>
+                <p>{{ lang.proses }}</p>
+            </div>
+            <div id="empty-state" class="empty-hint">
+                <i class="fas fa-seedling"></i>
+                {{ lang.empty_hint }}
+            </div>
+
+            <div id="report">
+                <div class="period-chip"><i class="fas fa-calendar"></i><span id="periodText"></span></div>
+                <div class="metric-grid">
+                    <div class="metric-card highlight"><div class="m-label">{{ lang.hari_cocok_tanam }}</div><div class="m-val" id="m-good"></div><div class="m-unit">{{ lang.dari_30_hari }}</div></div>
+                    <div class="metric-card"><div class="m-label">{{ lang.rata_suhu }}</div><div class="m-val" id="m-temp"></div><div class="m-unit">°C</div></div>
+                    <div class="metric-card"><div class="m-label">{{ lang.rata_curah_hujan }}</div><div class="m-val" id="m-rain"></div><div class="m-unit">mm / hari</div></div>
+                    <div class="metric-card"><div class="m-label">{{ lang.rata_angin }}</div><div class="m-val" id="m-wind"></div><div class="m-unit">m/s</div></div>
+                </div>
+
+                <div class="section-heading"><i class="fas fa-table"></i> {{ lang.data_harian }}</div>
+                <div class="table-card">
+                    <div class="table-header"><span><i class="fas fa-calendar-day" style="margin-right:6px"></i>{{ lang.prediksi_per_tanggal }}</span><span id="tableCount"></span></div>
+                    <div class="table-wrap">
+                        <table class="daily-table">
+                            <thead><tr>
+                                <th>{{ lang.tgl }}</th><th>{{ lang.curah_hujan_mm }}</th><th>{{ lang.suhu_maks_c }}</th><th>{{ lang.suhu_min_c }}</th><th>{{ lang.angin_ms }}</th><th>{{ lang.prediksi_cuaca }}</th><th>{{ lang.cocok_tanam }}</th>
+                            </tr></thead>
+                            <tbody id="dailyTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="chart-grid">
+                    <div class="chart-card"><div class="chart-title"><i class="fas fa-tint" style="color:var(--rain);margin-right:6px"></i>{{ lang.curah_hujan }}</div><div class="chart-wrap"><canvas id="chartRain"></canvas></div></div>
+                    <div class="chart-card"><div class="chart-title"><i class="fas fa-thermometer-half" style="color:var(--warn);margin-right:6px"></i>{{ lang.suhu_maks }}</div><div class="chart-wrap"><canvas id="chartTemp"></canvas></div></div>
+                </div>
+
+                <div class="section-heading"><i class="fas fa-seedling"></i> {{ lang.rekomendasi_tanaman }}</div>
+                <div class="kategori-block"><div class="kategori-label primadona"><i class="fas fa-star"></i> {{ lang.sangat_disarankan }}<span class="kl-line primadona"></span></div><div class="tanaman-grid" id="gridPrimadona"></div></div>
+                <div class="kategori-block" id="blockAlternatif"><div class="kategori-label alternatif"><i class="fas fa-check-circle"></i> {{ lang.kurang_disarankan }}<span class="kl-line alternatif"></span></div><div class="tanaman-grid" id="gridAlternatif"></div></div>
+                <div class="kategori-block" id="blockTidak"><div class="kategori-label tidak"><i class="fas fa-times-circle"></i> {{ lang.tidak_disarankan }}<span class="kl-line tidak"></span></div><div class="tanaman-grid" id="gridTidak"></div></div>
+
+                <div class="two-col" style="margin-top:1.5rem">
+                    <div class="info-card"><div class="ic-title"><i class="fas fa-tasks" style="margin-right:6px"></i>{{ lang.kegiatan_disarankan }}</div><div id="kegiatanList"></div></div>
+                    <div class="info-card warn-card"><div class="ic-title"><i class="fas fa-exclamation-triangle" style="margin-right:6px;color:var(--warn)"></i>{{ lang.peringatan }}</div><div id="peringatanList"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const langData = {
+        cuaca_hari_ini: "{{ lang.cuaca_hari_ini }}",
+        curah_hujan: "{{ lang.curah_hujan }}",
+        suhu_maks: "{{ lang.suhu_maks }}",
+        angin: "{{ lang.angin }}",
+        sangat_disarankan: "{{ lang.sangat_disarankan }}",
+        kurang_disarankan: "{{ lang.kurang_disarankan }}",
+        tidak_disarankan: "{{ lang.tidak_disarankan }}",
+        tidak_ada_peringatan: "{{ lang.tidak_ada_peringatan }}",
+        disarankan_tanam: "{{ lang.disarankan_tanam }}",
+        tanaman: "{{ lang.tanaman }}",
+        tanaman_terbaik: "{{ lang.tanaman_terbaik }}",
+        skor: "{{ lang.skor }}",
+        cocok: "{{ lang.cocok }}",
+        hati_hati: "{{ lang.hati_hati }}",
+        tidak_cocok: "{{ lang.tidak_cocok }}",
+        sun: "{{ lang.sun }}",
+        rain: "{{ lang.rain }}",
+        drizzle: "{{ lang.drizzle }}",
+        fog: "{{ lang.fog }}",
+        snow: "{{ lang.snow }}",
+        pilih_tanggal_alert: "{{ session.get('lang', 'id') == 'en' and 'Please select a date first.' or 'Pilih tanggal terlebih dahulu.' }}",
+        error_prefix: "{{ session.get('lang', 'id') == 'en' and 'Error' or 'Error' }}",
+        connection_error: "{{ session.get('lang', 'id') == 'en' and 'Connection error occurred.' or 'Terjadi kesalahan koneksi.' }}"
+    };
+    
+    const cuacaLabel = { 
+        sun: langData.sun, rain: langData.rain, drizzle: langData.drizzle, fog: langData.fog, snow: langData.snow
+    };
+    const cuacaIcon  = { sun:'☀️', rain:'🌧️', drizzle:'🌦️', fog:'🌫️', snow:'❄️' };
+    const locale = '{{ session.get("lang", "id") }}' === 'en' ? 'en-US' : 'id-ID';
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
+
+    let rainChart = null, tempChart = null;
+
+    function formatDate(str) { return new Date(str).toLocaleDateString(locale, { day:'numeric', month:'short', year:'numeric' }); }
+    function formatDateShort(str) { return new Date(str).toLocaleDateString(locale, { weekday:'short', day:'numeric', month:'short' }); }
+
+    function renderTable(daily) {
+        const hariLabel = locale === 'en-US' ? 'days' : 'hari';
+        document.getElementById('tableCount').textContent = daily.length + ' ' + hariLabel;
+        document.getElementById('dailyTableBody').innerHTML = daily.map(d => {
+            const cuaca = d.prediksi_cuaca.toLowerCase();
+            const label = cuacaLabel[cuaca] || cuaca;
+            const icon  = cuacaIcon[cuaca] || '';
+            const cocok = (cuaca === 'sun' || cuaca === 'fog') && d.precipitation < 5;
+            const warn  = cuaca === 'drizzle';
+            const cocokLabel = cocok ? '✅ ' + langData.cocok : warn ? '⚠️ ' + langData.hati_hati : '❌ ' + langData.tidak_cocok;
+            return '<tr><td class="td-date">' + formatDateShort(d.tanggal) + '</td><td class="td-num">' + d.precipitation.toFixed(1) + '</td><td class="td-num">' + d.temp_max.toFixed(1) + '</td><td class="td-num">' + d.temp_min.toFixed(1) + '</td><td class="td-num">' + d.wind.toFixed(1) + '</td><td><span class="cuaca-pill cuaca-' + cuaca + '">' + icon + ' ' + label + '</span></td><td style="font-size:12px">' + cocokLabel + '</td></tr>';
+        }).join('');
+    }
+
+    function buildTanamanCard(item, globalRank) {
+        const kat = item.kategori;
+        const pct = Math.round(item.skor * 100);
+        const rankClass = globalRank === 0 ? 'rank-1' : globalRank === 1 ? 'rank-2' : globalRank === 2 ? 'rank-3' : 'rank-n';
+        const barClass = kat === 'primadona' ? 'bar-primadona' : kat === 'alternatif' ? 'bar-alternatif' : 'bar-tidak';
+        const panenHTML = item.bisa_panen ? '<span class="panen-badge"><i class="fas fa-check-circle"></i> ' + langData.disarankan_tanam + '</span>' : '';
+        return '<div class="tanaman-card ' + kat + '"><div class="rank-circle ' + rankClass + '">' + (globalRank + 1) + '</div><div class="tanaman-info"><div class="tanaman-name">' + item.tanaman + '</div><div class="tanaman-skor">' + langData.skor + ': ' + item.skor.toFixed(3) + '</div><div class="skor-bar-wrap"><div class="skor-bar-fill ' + barClass + '" style="width:' + pct + '%"></div></div>' + panenHTML + '</div></div>';
+    }
+
+    function renderTanaman(ranking) {
+        const grids = { primadona: '', alternatif: '', tidak_disarankan: '' };
+        ranking.forEach((item, i) => { grids[item.kategori] += buildTanamanCard(item, i); });
+        document.getElementById('gridPrimadona').innerHTML = grids.primadona;
+        document.getElementById('gridAlternatif').innerHTML = grids.alternatif;
+        document.getElementById('gridTidak').innerHTML = grids.tidak_disarankan;
+        document.getElementById('blockAlternatif').style.display = grids.alternatif ? 'block' : 'none';
+        document.getElementById('blockTidak').style.display = grids.tidak_disarankan ? 'block' : 'none';
+    }
+
+    async function loadLaporan() {
+        const dateVal = document.getElementById('startDate').value;
+        if (!dateVal) return alert(langData.pilih_tanggal_alert);
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('report').style.display = 'none';
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('btnLaporan').disabled = true;
+        try {
+            const res = await fetch('/laporan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date: dateVal }) });
+            const data = await res.json();
+            if (data.error) { alert(langData.error_prefix + ': ' + data.error); return; }
+            renderReport(data);
+        } catch(e) { alert(langData.connection_error); console.error(e); }
+        finally { document.getElementById('loading').style.display = 'none'; document.getElementById('btnLaporan').disabled = false; }
+    }
+
+    function renderReport(data) {
+        document.getElementById('periodText').textContent = formatDate(data.start_date) + ' – ' + formatDate(data.end_date);
+        document.getElementById('m-good').textContent = data.good_days;
+        document.getElementById('m-temp').textContent = data.avg_temp_max.toFixed(1);
+        document.getElementById('m-rain').textContent = data.avg_precipitation.toFixed(1);
+        document.getElementById('m-wind').textContent = data.avg_wind.toFixed(1);
+        renderTable(data.daily);
+        const labels = data.daily.map((d, i) => { const dt = new Date(d.tanggal); return (i % 5 === 0) ? dt.toLocaleDateString(locale, { day:'numeric', month:'short' }) : ''; });
+        drawChart('chartRain', labels, data.daily.map(d => d.precipitation), '#1f6feb', 'rgba(31,111,235,0.15)', langData.curah_hujan);
+        drawChart('chartTemp', labels, data.daily.map(d => d.temp_max), '#d29922', 'rgba(210,153,34,0.15)', langData.suhu_maks);
+        renderTanaman(data.ranking_tanaman);
+        document.getElementById('kegiatanList').innerHTML = data.kegiatan.map(k => '<div class="info-item">' + k + '</div>').join('');
+        document.getElementById('peringatanList').innerHTML = data.peringatan.length ? data.peringatan.map(p => '<div class="info-item">' + p + '</div>').join('') : '<div class="info-item" style="color:var(--accent)">✅ ' + langData.tidak_ada_peringatan + '</div>';
+        document.getElementById('report').style.display = 'block';
+    }
+
+    function drawChart(canvasId, labels, values, lineColor, fillColor, label) {
+        if (canvasId === 'chartRain' && rainChart) { rainChart.destroy(); rainChart = null; }
+        if (canvasId === 'chartTemp' && tempChart) { tempChart.destroy(); tempChart = null; }
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        const chart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label, data: values, borderColor: lineColor, backgroundColor: fillColor, borderWidth: 1.5, pointRadius: 0, tension: 0.4, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7d8590', font: { size: 10 } } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7d8590', font: { size: 10 } } } } } });
+        if (canvasId === 'chartRain') rainChart = chart; else tempChart = chart;
+    }
+</script>
+</body>
+</html>
