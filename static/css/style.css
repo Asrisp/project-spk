@@ -1,0 +1,276 @@
+/* Style untuk seluruh halaman */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Memastikan elemen html dan body mengisi seluruh viewport */
+    font-family: sans-serif;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    transition: background-image 0.5s ease-in-out;
+}
+
+/* Memastikan body menutupi seluruh area viewport */
+body {
+    min-height: 100vh;
+    background-position: center center; /* Mengatur posisi gambar di tengah */
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover; /* **Memastikan gambar menutupi seluruh area tanpa ruang kosong** */
+}
+
+.text {
+    background: rgba(255, 255, 255, 0);        /* transparan */
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    color: #fff;
+    
+    /* Tambahkan ini */
+    min-height: 300px;  /* tinggi minimal, biar kotak tidak terlalu kecil */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* konten tetap di tengah vertikal */
+    width: 90%;  /* agar lebih proporsional */
+    max-width: 600px; /* lebar maksimal */
+    margin: auto;  /* center horizontal */
+}
+/* Style default (misalnya cerah) */
+.default {
+    background-image: url('../images/home.png');
+}
+
+/* Style untuk cuaca cerah (Sun) */
+.cerah {
+    background-image: url('../images/sun.jpg');
+}
+
+/* Style untuk cuaca hujan (Rain) */
+.hujan {
+    background-image: url('../images/rain.jpg');
+}
+
+/* Style untuk cuaca gerimis (Drizzle) */
+.gerimis {
+    background-image: url('../images/drizzle2.png');
+}
+
+/* Style untuk cuaca kabut (Fog) */
+.kabut {
+    background-image: url('../images/Fog.jpg');
+}
+
+/* Style untuk cuaca salju (Snow) */
+.salju {
+    background-image: url('../images/Snow.jpg');
+}
+
+/* Mengatur tata letak konten di tengah halaman */
+#hero-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.text {
+   background: rgba(255, 255, 255, 0);        /* transparan */
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);   /* bayangan lembut */
+  backdrop-filter: blur(10px);                 /* efek blur kaca */
+  -webkit-backdrop-filter: blur(10px);         /* support untuk Safari */
+  border: 1px solid rgba(255, 255, 255, 0.3);  /* garis tipis semi-transparan */
+  text-align: center;
+  color: #fff;                                 /* teks jadi putih biar kontras */
+}
+
+#humberger  {
+    display: none;
+}
+
+#search-container {
+    margin-top: 20px;
+}
+
+input[type="date"] {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Perbaikan untuk navigasi di bagian atas */
+#nav-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+.nav-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+.nav-brand h2 {
+    margin: 0;
+}
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+nav ul li {
+    display: inline;
+}
+
+/* Tambahkan ini ke bagian bawah file */
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Jarak antara teks dan ikon */
+    background-color: rgba(255, 255, 255, 0.2); /* Latar belakang transparan */
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Border transparan */
+    padding: 8px 15px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.logout-btn i {
+    font-size: 1.2em; /* Ukuran ikon */
+}
+
+/* Pastikan nav-flex menata kontennya dengan baik */
+.nav-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 20px;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* =======================
+   RESPONSIVE (Mobile)
+   ======================= */
+@media (max-width: 600px) {
+
+    /* Container utama biar tidak terlalu penuh */
+    #hero-container {
+        padding: 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .text {
+        width: 90%;
+        padding: 20px;
+        margin-top: 40px;
+        backdrop-filter: blur(6px);
+    }
+
+    /* Judul & teks agar tidak terlalu besar */
+    .text h1, 
+    .text h2, 
+    .text h3 {
+        font-size: 1.3rem;
+        line-height: 1.3;
+    }
+
+    /* Nav bar mengecil */
+    .nav-flex {
+        padding: 8px 12px;
+    }
+
+    .nav-brand h2 {
+        font-size: 1.1rem;
+        text-align: left;
+    }
+
+    /* Logout button biar tidak melebar */
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border-radius: 15px;
+    }
+
+    .logout-btn i {
+        font-size: 1rem;
+    }
+
+    /* Input date & tombol prediksi jadi full width */
+    #search-container input[type="date"],
+    #search-container button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+
+    /* Biar body background tidak zoom terlalu besar */
+    body {
+        background-size: cover;
+        background-position: center top;
+    }
+    /* Fix input tanggal agar tidak melebar keluar */
+    #search-container input[type="date"] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;   /* memastikan padding tidak bikin overflow */
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    /* Hilangkan icon bawaan date picker agar tidak mendorong layout */
+    #search-container input[type="date"]::-webkit-calendar-picker-indicator {
+        position: absolute;
+        right: 12px;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    /* Biar wrapper-nya tidak overflow */
+    #search-container {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Card container */
+    .text {
+        width: 90%;
+        max-width: 90%;
+        overflow: hidden; /* cegah bocor layout */
+    }
+}
+
